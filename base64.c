@@ -91,11 +91,11 @@ encb64(char *dst, const void *_src, size_t len)
 	}
 }
 
-/* enclenb64: return the size of count chars when converted to base64.
+/* encb64len: return the size of count chars when converted to base64.
  * The answer is always the same for the same count.
  */
 size_t
-enclenb64(size_t count)
+encb64len(size_t count)
 {
 	size_t b64len;
 	b64len = count / GROUPLEN * WORDLEN;
