@@ -43,7 +43,7 @@ encb64(char *dst, const void *_src, size_t len)
 {
 	int linelen;
 	/* Holds up to GROUPLEN bytes to be encoded in base64. */
-	uint32_t word;
+	uint32_t group;
 	/* How many bytes are left over after aligning to GROUPLEN. */
 	int leftover;
 	/* alignlen is <= len and aligned to GROUPLEN. */
@@ -51,15 +51,15 @@ encb64(char *dst, const void *_src, size_t len)
 	size_t i, j, k;
 	const unsigned char *src = _src;
 
-	linelen = word = 0;
+	linelen = group = 0;
 	leftover = len % WORDLEN;
 	alignlen = len - leftover;
 	for (i = j = 0; i < alignlen;) { /* Encode aligned groups. */
 		for (k = 0; k < GROUPLEN; k++)
-			word |= src[i++] << k * CHAR_BIT;
+			group |= src[i++] << k * CHAR_BIT;
 		for (k = 0; k < WORDLEN; k++) {
-			dst[j++] = b64set[word & 0x3f];
-			word >>= B64_BIT;
+			dst[j++] = b64set[group & 0x3f];
+			group >>= B64_BIT;
 		}
 		linelen += WORDLEN;
 		if (linelen == MAXLINE) {
@@ -71,11 +71,11 @@ encb64(char *dst, const void *_src, size_t len)
 
 	/* Grab 0, 1 or 2 leftover unencoded bytes. */
 	for (k = 0; k < leftover; k++)
-		word |= src[i++] << k * CHAR_BIT;
+		group |= src[i++] << k * CHAR_BIT;
 	/* Convert leftover bytes and count how many conversions were made. */
-	for (k = 0; word; k++) {
-		dst[j++] = b64set[word & 0x3f];
-		word >>= B64_BIT;
+	for (k = 0; group; k++) {
+		dst[j++] = b64set[group & 0x3f];
+		group >>= B64_BIT;
 	}
 	/* Pad with equal signs until the output is 4-byte aligned. */
 	if (k) {
